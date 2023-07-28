@@ -64,7 +64,9 @@ def testmy(udid, deviceName, systemPort):
     driver = AppiumDriver.Remote(
         'http://localhost:4723/wd/hub', options=options)
     
-    
+    wait_for_element(driver=driver, locator=(AppiumBy.XPATH, '//*[@text="Battery"]'))
+    driver.find_element(by=AppiumBy.XPATH, value='//*[@text="Battery"]').click()
+    driver.quit()
 
     # wait_for_element(driver=driver, locator=(AppiumBy.XPATH, '//*[@text="Battery"]'))
 

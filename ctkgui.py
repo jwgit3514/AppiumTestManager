@@ -26,16 +26,50 @@ def reset_script():
         messagebox.showerror("Error", f"Failed to reset text: {str(e)}")
 
 
+# def modify_label_text(label_text) -> str:
+#     # Replace spaces with underscores
+#     modified_text = label_text.replace(";", "\t")
+
+#     lines = modified_text.split("\n")
+#     prefix = "\t"
+#     modified_lines = [f"{prefix}{line}" for line in lines]
+#     modified_text = "\n".join(modified_lines)
+#     # Convert to lowercase
+#     modified_text = modified_text.lower()
+
+#     return modified_text
+
+
+# def insert_text_to_file(filename, line_number, text_to_insert) -> None:
+#     try:
+#         with open(filename, 'r') as file:
+#             lines = file.readlines()
+#     except FileNotFoundError:
+#         messagebox.showerror("Error", "File not found.")
+#         return
+
+#     if line_number > len(lines):
+#         messagebox.showerror(
+#             "Error", "Line number exceeds the number of lines in the file.")
+#         return
+
+#     lines.insert(line_number - 1, modify_label_text(text_to_insert) + '\n')
+
+#     try:
+#         with open(filename, 'w') as file:
+#             file.writelines(lines)
+#         messagebox.showinfo("Success", f"Text inserted at line {line_number}.")
+#     except Exception as e:
+#         messagebox.showerror("Error", f"Failed to insert text: {str(e)}")
+
 def modify_label_text(label_text) -> str:
     # Replace spaces with underscores
     modified_text = label_text.replace(";", "\t")
 
     lines = modified_text.split("\n")
-    prefix = "\t"
+    prefix = "    "
     modified_lines = [f"{prefix}{line}" for line in lines]
     modified_text = "\n".join(modified_lines)
-    # Convert to lowercase
-    modified_text = modified_text.lower()
 
     return modified_text
 
