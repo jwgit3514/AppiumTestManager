@@ -7,6 +7,7 @@ from appium.webdriver.webdriver import AppiumOptions
 import pytest
 import sys
 import os
+import base64
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 
@@ -61,14 +62,28 @@ def testmy(udid, deviceName, systemPort):
     #     },
     # }
 
+    with open('./cropped_2.png', 'rb') as f:
+        image_base64 = base64.b64encode(f.read()).decode("utf-8")
+
     driver = AppiumDriver.Remote(
         'http://localhost:4723/wd/hub', options=options)
     
-    wait_for_element(driver=driver, locator=(AppiumBy.XPATH, '//*[@text="Battery"]'))
-    driver.find_element(by=AppiumBy.XPATH, value='//*[@text="Battery"]').click()
-    driver.quit()
+    accurency = 0.9
+    driver.update_settings({"imageMatchThreshold": accurency})
 
-    # wait_for_element(driver=driver, locator=(AppiumBy.XPATH, '//*[@text="Battery"]'))
+    while True:
+        try:
+            element = driver.find_element(AppiumBy.IMAGE, image_base64)
+            element.click()
+            break # 이미지를 찾으면 클릭 후에 무한 반복문 종료
+        except Exception as e: #이미지를 찾지못하면 NoSuchElementException이 발생하는데 이것을 catch
+            accurency -= 0.05 # 찾고자하는 이미지와, 스크린 상에서의 이미지의 정확도(매칭률)을 조정하고
+            driver.update_settings({"imageMatchThreshold": accurency}) # 정확도 업데이트 후 다시 반복 시작
+
+    # wait_for_element(driver=driver, locator=(AppiumBy.XPATH, '//*[@text="홍정원"]'))
+    # driver.find_element(by=AppiumBy.XPATH, value='//*[@text="홍정원"]').click()
+    # driver.quit()
+  
 
     # driver.find_element(by=AppiumBy.XPATH,
     #                     value='//*[@text="Battery"]').click()

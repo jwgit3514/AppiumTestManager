@@ -1,4 +1,4 @@
 {
-    "package": "com.android.settings",
-    "activity": ".Settings"
+  "package": "com.pressa.cosm",
+  "activity": "com.google.firebase.MessagingUnityPlayerActivity"
 }
