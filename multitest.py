@@ -8,11 +8,10 @@ import pytest
 import sys
 import os
 import base64
+import pickle
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-
 settings = getcaps()
-
 
 def optionInit(udid, deviceName, systemPort, appPackage, appActivity):
     options = AppiumOptions()
@@ -38,7 +37,32 @@ def wait_for_element(driver, locator, timeout=60):
     except Exception as e:
         driver.quit()
         raise Exception(f"Element not found within {timeout} seconds: {e}")
+    
+def element_click_from_img(driver, img, timeout=60):
+    with open(img, 'rb') as f:
+        image_base64 = base64.b64encode(f.read()).decode("utf-8")
+    
+    accurency = 0.9
+    driver.update_settings({"imageMatchThreshold": accurency})
 
+    while True:
+        try:
+            element = driver.find_element(AppiumBy.IMAGE, image_base64)
+            element.click()
+            break 
+        except Exception as e: 
+            accurency -= 0.05 
+            driver.update_settings({"imageMatchThreshold": accurency})
+
+def append_func():
+    try:
+        with open('data_.pickle', 'rb') as f:
+            data_list = pickle.load(f)            
+    except Exception as e:
+        print("Error!!!! : ", e)
+        data_list = []
+
+    return data_list
 
 @pytest.mark.parametrize('udid, deviceName, systemPort', settings)
 def testmy(udid, deviceName, systemPort):
@@ -61,24 +85,15 @@ def testmy(udid, deviceName, systemPort):
     #         'systemPort': int(systemPort)
     #     },
     # }
+    driver = AppiumDriver.Remote('http://localhost:4723/wd/hub', options=options)    
+        
+    test_list = []
+    test_img_list = append_func()
 
-    with open('./cropped_2.png', 'rb') as f:
-        image_base64 = base64.b64encode(f.read()).decode("utf-8")
+    for test in test_img_list:
+        test_list.append(element_click_from_img(driver, test))
 
-    driver = AppiumDriver.Remote(
-        'http://localhost:4723/wd/hub', options=options)
-    
-    accurency = 0.9
-    driver.update_settings({"imageMatchThreshold": accurency})
-
-    while True:
-        try:
-            element = driver.find_element(AppiumBy.IMAGE, image_base64)
-            element.click()
-            break # 이미지를 찾으면 클릭 후에 무한 반복문 종료
-        except Exception as e: #이미지를 찾지못하면 NoSuchElementException이 발생하는데 이것을 catch
-            accurency -= 0.05 # 찾고자하는 이미지와, 스크린 상에서의 이미지의 정확도(매칭률)을 조정하고
-            driver.update_settings({"imageMatchThreshold": accurency}) # 정확도 업데이트 후 다시 반복 시작
+    test_list
 
     # wait_for_element(driver=driver, locator=(AppiumBy.XPATH, '//*[@text="홍정원"]'))
     # driver.find_element(by=AppiumBy.XPATH, value='//*[@text="홍정원"]').click()
