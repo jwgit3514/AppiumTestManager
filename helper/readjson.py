@@ -27,7 +27,9 @@ def get_first_key():
     except Exception as e:
         print("Error!!!! : ", e)
         json_data = {}
-
+        
+    if json_data == 0:
+        return
     first_key = list(json_data.keys())[0]
     return first_key
 

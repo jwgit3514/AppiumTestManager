@@ -117,7 +117,7 @@ class FrameForFile(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.file_listbox.dnd_bind('<<Drop>>', self.on_drop)
 
         self.rm_btn = ctk.CTkButton(self, text='REMOVE', command=self.on_remove)
-        self.rm_btn.pack()
+        self.rm_btn.pack(pady=10)
 
     def update_image(self, image_path):
         img = Image.open(image_path)
@@ -307,15 +307,11 @@ class App(ctk.CTk):
         self.testframe.pack(expand=True, fill='both')
 
 
-   
-
 def cleatup_func():
     try:
-    # 파일 삭제
         os.remove('./data_.pickle')        
     except OSError as e:
-    # 파일이 존재하지 않거나 권한이 없는 경우 예외 처리
-        print(f"파일 삭제 오류: {e}")
+        print(f"file not found!: {e}")
 
 if __name__ == "__main__":
     atexit.register(cleatup_func)
