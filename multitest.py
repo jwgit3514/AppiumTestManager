@@ -9,7 +9,7 @@ import sys
 import os
 import base64
 import pickle
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+# sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 settings = getcaps()
 
@@ -26,7 +26,6 @@ def optionInit(udid, deviceName, systemPort, appPackage, appActivity):
     options.set_capability('systemPort', int(systemPort))
 
     return options
-
 
 def wait_for_element(driver, locator, timeout=60):
     try:

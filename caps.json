@@ -1,12 +1,1 @@
-{
-  "1": {
-    "udid": "emulator-5556",
-    "devicename": "",
-    "systemport": "8201"
-  },
-  "2": {
-    "udid": "emulator-5558",
-    "devicename": "",
-    "systemport": "8202"
-  }
-}
+{}

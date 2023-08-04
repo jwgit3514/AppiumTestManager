@@ -1,36 +1,23 @@
 import tkinter as tk
-from tkinter import ttk
 import customtkinter as ctk
 import os
+import pickle
+import atexit
+import sys
 from helper.readjson import *
 from tkinter import messagebox
 from filepath import *
 from TkinterDnD2 import DND_ALL, TkinterDnD
 from CTkListbox import *
 from PIL import Image
-import pickle
-import atexit
+from tkinter import ttk
+from threading import Thread
+from helper.os_helper import call_device
+
+sys.path.append('./')
 
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("green")
-
-
-def reset_script():
-    try:
-        with open(multitest_ori, 'r', encoding='UTF8') as file:
-            origin_script = file.read()
-            print(origin_script)
-    except FileNotFoundError:
-        messagebox.showerror("Error", "File not found")
-
-    try:
-        with open(multitest_modi, "w") as file:
-            file.write(origin_script)
-            messagebox.showinfo("Success", "Success Reset file")
-            file.close()
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to reset text: {str(e)}")
-
 
 # def modify_label_text(label_text) -> str:
 #     # Replace spaces with underscores
@@ -73,7 +60,6 @@ def modify_label_text(label_text) -> str:
     modified_text = "\n".join(modified_lines)
 
     return modified_text
-
 
 def insert_text_to_file(filename, line_number, text_to_insert) -> None:
     try:
@@ -183,77 +169,93 @@ class FrameForFile(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         data_list.remove(selected_option)
         print('past list : ' , data_list)
         with open('data_.pickle', "wb") as f:
-            pickle.dump(data_list, f)
+            pickle.dump(data_list, f)    
 
     def on_remove(self):
         self.delete_from_pickle()
         self.delete_from_list()
 
 class TestFrame(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, **kwargs):        
+        super().__init__(master, **kwargs)        
         
-        super().__init__(master, **kwargs)
+        # self.entry_udid = ctk.CTkEntry(self, placeholder_text='input udid')
+        # self.entry_udid.place(x=20, y=20)
+
+        # self.entry_devicename = ctk.CTkEntry(
+        #     self, placeholder_text='input devicename')
+        # self.entry_devicename.place(x=20, y=50)
+
+        # self.entry_systemport = ctk.CTkEntry(
+        #     self, placeholder_text='input systemport')
+        # self.entry_systemport.place(x=20, y=80)
         
-        self.entry_udid = ctk.CTkEntry(self, placeholder_text='input udid')
-        self.entry_udid.place(x=20, y=20)
+        # self.save = ctk.CTkButton(
+        # self, text='SAVE EMU', command=self.on_save_emulator)
+        # self.save.place(x=20, y=110)
 
-        self.entry_devicename = ctk.CTkEntry(
-            self, placeholder_text='input devicename')
-        self.entry_devicename.place(x=20, y=50)
+        # self.combo_list = ctk.CTkComboBox(self, values=call_device(
+        # ), command=self.combo_callback, variable=ctk.StringVar(value="select emulator"), state='readonly')
+        # self.combo_list.place(x=20, y=160)
 
-        self.entry_systemport = ctk.CTkEntry(
-            self, placeholder_text='input systemport')
-        self.entry_systemport.place(x=20, y=80)
-        
-        self.save = ctk.CTkButton(
-        self, text='SAVE EMU', command=self.on_save_emulator)
-        self.save.place(x=20, y=110)
+        # self.label_udid = ctk.CTkLabel(self, text='null')
+        # self.label_udid.place(x=20, y=190)
+        # self.label_devicename = ctk.CTkLabel(self, text='null')
+        # self.label_devicename.place(x=20, y=220)
+        # self.label_systemport = ctk.CTkLabel(self, text='null')
+        # self.label_systemport.place(x=20, y=250)
 
-        self.combo_list = ctk.CTkComboBox(self, values=get_emuid(
-        ), command=self.combo_callback, variable=ctk.StringVar(value="select emulator"), state='readonly')
-        self.combo_list.place(x=20, y=160)
-
-        self.label_udid = ctk.CTkLabel(self, text='null')
-        self.label_udid.place(x=20, y=190)
-        self.label_devicename = ctk.CTkLabel(self, text='null')
-        self.label_devicename.place(x=20, y=220)
-        self.label_systemport = ctk.CTkLabel(self, text='null')
-        self.label_systemport.place(x=20, y=250)
-
-        self.remove_cap = ctk.CTkButton(
-        self, text='REMOVE', command=self.on_remove)
-        self.remove_cap.place(x=20, y=280)
+        # self.remove_cap = ctk.CTkButton(
+        # self, text='REMOVE', command=self.on_remove)
+        # self.remove_cap.place(x=20, y=280)
+        self.device_listbox = tk.Listbox(self, selectmode='browse', width=50, state='normal') 
+        self.device_listbox.place(x=0, y=0)
 
         self.entry_package = ctk.CTkEntry(
             self, placeholder_text='input package')
-        self.entry_package.place(x=200, y=20)
+        self.entry_package.place(x=400, y=20)
 
         self.entry_activity = ctk.CTkEntry(
             self, placeholder_text='input activity')
-        self.entry_activity.place(x=200, y=50)
+        self.entry_activity.place(x=400, y=50)
         
         self.app_data_save_btn = ctk.CTkButton(
         self, text='SET PACKAGE DATA', command=self.on_data_save)
-        self.app_data_save_btn.place(x=200, y=80) 
+        self.app_data_save_btn.place(x=400, y=80) 
 
-        self.reset = ctk.CTkButton(self, text='RESET', command=self.on_reset)
-        self.reset.place(x=200, y=110)        
-
-        self.run_test = ctk.CTkButton(
-            self, text='RUN', command=self.on_test)
+        self.run_test = ctk.CTkButton(self, text='RUN')
         self.run_test.place(x=400, y=400)
+        self.run_test.configure(command=self.on_test)
 
-    def on_reset(self) -> None:
-        reset_script()
+        self.update_list()
+
+    def update_list(self) -> None:
+        dev_list = call_device()
+        self.insert_listbox(dev_list)
+        print("updated!! : ", dev_list)
+
+    def insert_listbox(self, dev_list) -> None:
+        for device in dev_list:        
+            self.device_listbox.insert(self.device_listbox.size(), device)         
 
     def on_save_emulator(self) -> None:
-        udid = self.entry_udid.get()
-        devicename = self.entry_devicename.get()
-        systemport = self.entry_systemport.get()
+        # udid = self.entry_udid.get()
+        # devicename = self.entry_devicename.get()
+        # systemport = self.entry_systemport.get()
 
-        putcaps(udid, devicename, systemport)
+        # putcaps(udid, devicename, systemport)
 
-        self.combo_reset()
+        # self.combo_reset()
+        initialize_caps()
+        device_list = call_device()
+        count = 1
+        for id in device_list:
+            print('id : ', id)
+            udid = id
+            systemport = 8200+count
+            count += 1
+            new_data = {'udid': udid, 'devicename': udid, 'systemport': str(systemport)}
+            refresh_caps(new_data)
 
     def combo_callback(self, choice) -> None:
         print("clicked combobox", choice)
@@ -263,12 +265,12 @@ class TestFrame(ctk.CTkFrame):
 
         print(self.combo_list.get())
 
-    def on_remove(self) -> None:
-        choice = self.combo_list.get()
-        print("selected!! ", choice)
-        remove_key_value_pair('caps.json', choice)
+    # def on_remove(self) -> None:
+    #     choice = self.combo_list.get()
+    #     print("selected!! ", choice)
+    #     remove_key_value_pair('caps.json', choice)
 
-        self.combo_reset()
+    #     self.combo_reset()
 
     def combo_reset(self) -> None:
         first_val = ctk.StringVar()
@@ -278,6 +280,7 @@ class TestFrame(ctk.CTkFrame):
 
     def data_update(self, choice) -> None:
         data_list = get_emudata(choice)
+        print("seleted data : ", data_list)
         self.label_udid.configure(text='udid : ' + data_list[0][1])
         self.label_devicename.configure(text='device : ' + data_list[1][1])
         self.label_systemport.configure(text='systemport : ' + data_list[2][1])
@@ -287,8 +290,12 @@ class TestFrame(ctk.CTkFrame):
         activity_ = self.entry_activity.get()
         setapps(pacakge_, activity_)
 
+    def run_test_thread(self) -> None:
+        os.system("pytest -n auto")       
+
     def on_test(self) -> None:
-        os.system("pytest -n auto")
+        threading = Thread(target=self.run_test_thread)
+        threading.start()
 
 class App(ctk.CTk):
     def __init__(self):
@@ -316,7 +323,7 @@ def cleatup_func():
 if __name__ == "__main__":
     atexit.register(cleatup_func)
 
-    app = App()    
+    app = App()        
     app.mainloop()
 
 
