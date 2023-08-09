@@ -176,9 +176,10 @@ class FrameForFile(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.delete_from_list()
 
 class TestFrame(ctk.CTkFrame):
+
     def __init__(self, master, **kwargs):        
         super().__init__(master, **kwargs)        
-        
+
         # self.entry_udid = ctk.CTkEntry(self, placeholder_text='input udid')
         # self.entry_udid.place(x=20, y=20)
 
@@ -225,14 +226,19 @@ class TestFrame(ctk.CTkFrame):
 
         self.run_test = ctk.CTkButton(self, text='RUN')
         self.run_test.place(x=400, y=400)
-        self.run_test.configure(command=self.on_test)
+        self.run_test.configure(command=self.on_test)  
 
         self.update_list()
 
     def update_list(self) -> None:
         dev_list = call_device()
+        self.clear_list()
         self.insert_listbox(dev_list)
         print("updated!! : ", dev_list)
+        self.after(5000, self.update_list)     
+
+    def clear_list(self) -> None:
+        self.device_listbox.delete(0, 'end')        
 
     def insert_listbox(self, dev_list) -> None:
         for device in dev_list:        
@@ -314,15 +320,14 @@ class App(ctk.CTk):
         self.testframe.pack(expand=True, fill='both')
 
 
-def cleatup_func():
+def cleanup_func():
     try:
         os.remove('./data_.pickle')        
     except OSError as e:
         print(f"file not found!: {e}")
 
 if __name__ == "__main__":
-    atexit.register(cleatup_func)
-
+    atexit.register(cleanup_func)
     app = App()        
     app.mainloop()
 
