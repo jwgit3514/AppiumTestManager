@@ -27,8 +27,10 @@ def optionInit(udid, deviceName, systemPort, appPackage, appActivity):
 
     return options
 
-def wait_for_element(driver, locator, timeout=60):
+def wait_for_element(driver, image_base64, locator = None, timeout=60):
+    locator = (AppiumBy.IMAGE, image_base64)
     try:
+        print('waitting for element...')
         element = WebDriverWait(driver, timeout).until(
             EC.presence_of_element_located(locator)
         )
@@ -40,6 +42,8 @@ def wait_for_element(driver, locator, timeout=60):
 def element_click_from_img(driver, img, timeout=60):
     with open(img, 'rb') as f:
         image_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+    wait_for_element(driver=driver, image_base64=image_base64)
     
     accurency = 0.9
     driver.update_settings({"imageMatchThreshold": accurency})
@@ -93,6 +97,8 @@ def testmy(udid, deviceName, systemPort):
         test_list.append(element_click_from_img(driver, test))
 
     test_list
+
+    driver.quit()
 
     # wait_for_element(driver=driver, locator=(AppiumBy.XPATH, '//*[@text="홍정원"]'))
     # driver.find_element(by=AppiumBy.XPATH, value='//*[@text="홍정원"]').click()

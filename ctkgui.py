@@ -234,7 +234,7 @@ class TestFrame(ctk.CTkFrame):
         dev_list = call_device()
         self.clear_list()
         self.insert_listbox(dev_list)
-        print("updated!! : ", dev_list)
+        #print("updated!! : ", dev_list)
         self.after(5000, self.update_list)     
 
     def clear_list(self) -> None:
