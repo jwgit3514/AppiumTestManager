@@ -5,8 +5,6 @@ from appium import webdriver as AppiumDriver
 from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.webdriver import AppiumOptions
 import pytest
-import sys
-import os
 import base64
 import pickle
 # sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
@@ -27,7 +25,7 @@ def optionInit(udid, deviceName, systemPort, appPackage, appActivity):
 
     return options
 
-def wait_for_element(driver, image_base64, locator = None, timeout=60):
+def wait_for_element(driver, image_base64, locator = None, timeout=30):
     locator = (AppiumBy.IMAGE, image_base64)
     try:
         print('waitting for element...')
@@ -45,7 +43,7 @@ def element_click_from_img(driver, img, timeout=60):
 
     wait_for_element(driver=driver, image_base64=image_base64)
     
-    accurency = 0.9
+    accurency = 1.0
     driver.update_settings({"imageMatchThreshold": accurency})
 
     while True:
@@ -57,7 +55,7 @@ def element_click_from_img(driver, img, timeout=60):
             accurency -= 0.05 
             driver.update_settings({"imageMatchThreshold": accurency})
 
-def append_func():
+def get_target():
     try:
         with open('data_.pickle', 'rb') as f:
             data_list = pickle.load(f)            
@@ -91,11 +89,12 @@ def testmy(udid, deviceName, systemPort):
     driver = AppiumDriver.Remote('http://localhost:4723/wd/hub', options=options)    
         
     test_list = []
-    test_img_list = append_func()
+    test_img_list = get_target()
 
     for test in test_img_list:
         test_list.append(element_click_from_img(driver, test))
 
+    print('startting for test...')
     test_list
 
     driver.quit()

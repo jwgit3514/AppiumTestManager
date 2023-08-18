@@ -296,8 +296,10 @@ class TestFrame(ctk.CTkFrame):
         activity_ = self.entry_activity.get()
         setapps(pacakge_, activity_)
 
-    def run_test_thread(self) -> None:
-        os.system("pytest -n auto")       
+    def run_test_thread(self) -> None:        
+        cmd = 'pytest -n auto --capture=no'
+        print(cmd)
+        os.system(cmd)
 
     def on_test(self) -> None:
         threading = Thread(target=self.run_test_thread)
