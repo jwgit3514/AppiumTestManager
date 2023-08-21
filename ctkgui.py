@@ -19,37 +19,6 @@ sys.path.append('./')
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("green")
 
-# def modify_label_text(label_text) -> str:
-#     # Replace spaces with underscores
-#     modified_text = label_text.replace(";", "\t")
-#     lines = modified_text.split("\n")
-#     prefix = "\t"
-#     modified_lines = [f"{prefix}{line}" for line in lines]
-#     modified_text = "\n".join(modified_lines)
-#     # Convert to lowercase
-#     modified_text = modified_text.lower()
-#     return modified_text
-
-
-# def insert_text_to_file(filename, line_number, text_to_insert) -> None:
-#     try:
-#         with open(filename, 'r') as file:
-#             lines = file.readlines()
-#     except FileNotFoundError:
-#         messagebox.showerror("Error", "File not found.")
-#         return
-#     if line_number > len(lines):
-#         messagebox.showerror(
-#             "Error", "Line number exceeds the number of lines in the file.")
-#         return
-#     lines.insert(line_number - 1, modify_label_text(text_to_insert) + '\n')
-#     try:
-#         with open(filename, 'w') as file:
-#             file.writelines(lines)
-#         messagebox.showinfo("Success", f"Text inserted at line {line_number}.")
-#     except Exception as e:
-#         messagebox.showerror("Error", f"Failed to insert text: {str(e)}")
-
 def modify_label_text(label_text) -> str:
     # Replace spaces with underscores
     modified_text = label_text.replace(";", "\t")
@@ -92,9 +61,17 @@ class FrameForFile(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.Label = ctk.CTkLabel(self, text="None")
         self.Label.pack(expand=True, padx=100)  
 
-
         # self.file_listbox = CTkListbox(self, command=self.show_value, text_color='black')
-        # self.file_listbox.pack(expand=True)    
+        # self.file_listbox.pack(expand=True)
+
+        self.coordi_x = ctk.CTkEntry(self,)
+        self.coordi_x.pack()
+
+        self.coordi_y = ctk.CTkEntry(self,)
+        self.coordi_y.pack()
+
+        self.input_coordi_btn = ctk.CTkButton(self, text='INPUT', command=self.input_coordi)
+        self.input_coordi_btn.pack(pady=10)    
 
         self.file_listbox = tk.Listbox(self, selectmode='browse', width=50) 
         self.file_listbox.bind('<<ListboxSelect>>', self.show_value)
@@ -105,6 +82,7 @@ class FrameForFile(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.rm_btn = ctk.CTkButton(self, text='REMOVE', command=self.on_remove)
         self.rm_btn.pack(pady=10)
 
+
     def update_image(self, image_path):
         img = Image.open(image_path)
         width, height = img.size
@@ -114,27 +92,31 @@ class FrameForFile(ctk.CTkFrame, TkinterDnD.DnDWrapper):
     def on_drop(self, event):
         file_path = event.data
         self.insert_listbox(file_path)
-        self.save_pickle_data(file_path)
+        self.save_pickle_data_img(file_path)
         self.print_Frame(file_path)        
 
-    def print_Frame(self, file_path) -> None:
-        file_path_ = file_path
-        print(file_path_)
-        self.update_image(file_path_)
+    def print_Frame(self, file_path = None) -> None:
+        try:
+            file_path_ = file_path
+            self.update_image(file_path_)
+        except Exception as e:
+            print('selected coordinates \'_\'')
+            print(e)
     
-    def insert_listbox(self, file_path) -> None:        
-        self.file_listbox.insert(self.file_listbox.size(), file_path)
+    def insert_listbox(self, test_) -> None:             
+        self.file_listbox.insert(self.file_listbox.size(), test_)
 
     def show_value(self, event):
         #print('key : ', self.file_listbox.curselection())
         selected_index = self.file_listbox.curselection()[0]
         selected_option = self.file_listbox.get(selected_index)
+
         self.print_Frame(selected_option)
 
     def test_setting(self):
         pass
 
-    def save_pickle_data(self, data):
+    def save_pickle_data_img(self, img_path, flag=1):
         try:
             with open('data_.pickle', 'rb') as f:
                 data_list = pickle.load(f)
@@ -142,10 +124,30 @@ class FrameForFile(ctk.CTkFrame, TkinterDnD.DnDWrapper):
             print("Error!!!! : ", e)
             data_list = []
         # print("data_list : " ,data_list)
+        data = {'flag': flag, 'img': img_path}
         data_list.append(data)
         # print("appended_list : ", data_list)
         with open('data_.pickle', 'wb') as f:
             pickle.dump(data_list, f)
+
+    def save_pickle_data_coordinates(self,x,y,flag=2):
+        try:
+            with open('data_.pickle', 'rb') as f:
+                data_list = pickle.load(f)
+        except Exception as e:
+            print("Error!!!! : ", e)
+            data_list = []
+        data = {'flag' : flag , 'x' : x , "y" : y}
+        data_list.append(data)
+        # print("appended_list : ", data_list)
+        with open('data_.pickle', 'wb') as f:
+            pickle.dump(data_list, f)
+    
+    def input_coordi(self,):
+        x = self.coordi_x.get()
+        y = self.coordi_y.get()
+        self.save_pickle_data_coordinates(int(x), int(y))        
+        self.insert_listbox(f'x : {x}, y : {y}')
 
     def delete_from_list(self):
         selection = self.file_listbox.curselection()
@@ -163,10 +165,13 @@ class FrameForFile(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         
         selected_index = self.file_listbox.curselection()[0]
         selected_option = self.file_listbox.get(selected_index)
-
+        
+        
         print('selected_option : ', selected_option) 
         print('pre list : ' , data_list)
-        data_list.remove(selected_option)
+        #data_list.remove(selected_option)
+        if selected_index < len(data_list):
+            del data_list[selected_index]
         print('past list : ' , data_list)
         with open('data_.pickle', "wb") as f:
             pickle.dump(data_list, f)    
@@ -297,7 +302,7 @@ class TestFrame(ctk.CTkFrame):
         setapps(pacakge_, activity_)
 
     def run_test_thread(self) -> None:        
-        cmd = 'pytest -n auto --capture=no'
+        cmd = 'pytest -n auto'
         print(cmd)
         os.system(cmd)
 

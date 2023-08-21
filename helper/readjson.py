@@ -79,8 +79,11 @@ def getcaps() -> dict:
         count += 1
         
         temp_list = (udid, udid, systemport)
-        list.append(temp_list)        
-    print('list in deviceSSSSSSS', list)
+        list.append(temp_list)
+
+    with open('caps.json', 'w') as file:
+        json.dump(list, file, indent=2)
+
     return list
 
 
@@ -169,4 +172,6 @@ def setapps(packagename, activityname) -> None:
     except Exception as e:
         print("not??? file", e)
 
-getcaps()
+
+if __name__ == "__main__":
+    getcaps()

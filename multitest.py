@@ -4,9 +4,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from appium import webdriver as AppiumDriver
 from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.webdriver import AppiumOptions
+from appium.webdriver.common.touch_action import TouchAction
 import pytest
 import base64
 import pickle
+import time
 # sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 settings = getcaps()
@@ -55,6 +57,10 @@ def element_click_from_img(driver, img, timeout=60):
             accurency -= 0.05 
             driver.update_settings({"imageMatchThreshold": accurency})
 
+def element_click_from_coordinate(driver, x, y, timeout=60):
+    TouchAction(driver).tap(None, x, y, 1).perform()
+    pass            
+
 def get_target():
     try:
         with open('data_.pickle', 'rb') as f:
@@ -87,15 +93,28 @@ def testmy(udid, deviceName, systemPort):
     #     },
     # }
     driver = AppiumDriver.Remote('http://localhost:4723/wd/hub', options=options)    
-        
+
+    time.sleep(5)
+
     test_list = []
-    test_img_list = get_target()
+    test_target_list = get_target()
 
-    for test in test_img_list:
-        test_list.append(element_click_from_img(driver, test))
+    #flag 1 -> tap
+    #flag 2 -> img
+    #...
 
-    print('startting for test...')
+    for i in range(len(test_target_list)):
+        if test_target_list[i]['flag'] == 1:
+            print('flag : ', test_target_list[i]['flag'])
+            test_list.append(element_click_from_img(driver, test_target_list[i]['img']))
+        elif test_target_list[i]['flag'] == 2:
+            print('flag : ', test_target_list[i]['flag'])
+            test_list.append(element_click_from_coordinate(driver, x=test_target_list[i]['x'], y=test_target_list[i]['y']))
+
+    print('startting for test...', test_list)
     test_list
+
+    time.sleep(10)
 
     driver.quit()
 
@@ -109,3 +128,39 @@ def testmy(udid, deviceName, systemPort):
     # driver.quit()
 
     assert True
+
+def save_pick(insert_data):
+    try:
+        with open('data_.pickle', 'rb') as f:
+            data_list = pickle.load(f)
+    except Exception as e:
+        print("Error!!!! : ", e)
+        data_list = []
+    # data = [{'flag':'1', 'x':'123', 'y':'456'},
+    #         {'flag':'2', 'path':'D:/a/b/c/adf.png'},
+    #         {'flag':'1', 'x':'789', 'y':'101112'}]
+    data = insert_data
+    data_list.append(data)
+    with open('data_.pickle', 'wb') as f:
+            pickle.dump(data_list, f)
+
+def test():
+    test_list = []
+    test_target_list = get_target()
+    #flag 1 -> tap
+    #flag 2 -> img
+    #...
+    print(test_target_list)
+    for i in range(len(test_target_list)):        
+        if test_target_list[i]['flag'] == 1:
+            print(test_target_list[i]['img'])
+        elif test_target_list[i]['flag'] == 2:
+            pass
+    print('startting for test...', test_list)
+
+
+if __name__ == "__main__":
+    save_pick({'flag': 1, 'x': '123', 'y': '456' })
+    save_pick({'flag': 2, 'path':'D:/a/b/c/adf.png'})
+    save_pick({'flag': 1, 'x':'789', 'y':'101112'})
+    test()
