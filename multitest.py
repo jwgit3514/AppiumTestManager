@@ -13,6 +13,7 @@ import time
 
 settings = getcaps()
 
+
 def optionInit(udid, deviceName, systemPort, appPackage, appActivity):
     options = AppiumOptions()
     options.platform_name = 'Android'
@@ -27,7 +28,8 @@ def optionInit(udid, deviceName, systemPort, appPackage, appActivity):
 
     return options
 
-def wait_for_element(driver, image_base64, locator = None, timeout=30):
+
+def wait_for_element(driver, image_base64, locator=None, timeout=30):
     locator = (AppiumBy.IMAGE, image_base64)
     try:
         print('waitting for element...')
@@ -38,13 +40,14 @@ def wait_for_element(driver, image_base64, locator = None, timeout=30):
     except Exception as e:
         driver.quit()
         raise Exception(f"Element not found within {timeout} seconds: {e}")
-    
+
+
 def element_click_from_img(driver, img, timeout=60):
     with open(img, 'rb') as f:
         image_base64 = base64.b64encode(f.read()).decode("utf-8")
 
     wait_for_element(driver=driver, image_base64=image_base64)
-    
+
     accurency = 1.0
     driver.update_settings({"imageMatchThreshold": accurency})
 
@@ -52,24 +55,27 @@ def element_click_from_img(driver, img, timeout=60):
         try:
             element = driver.find_element(AppiumBy.IMAGE, image_base64)
             element.click()
-            break 
-        except Exception as e: 
-            accurency -= 0.05 
+            break
+        except Exception as e:
+            accurency -= 0.05
             driver.update_settings({"imageMatchThreshold": accurency})
+
 
 def element_click_from_coordinate(driver, x, y, timeout=60):
     TouchAction(driver).tap(None, x, y, 1).perform()
-    pass            
+    pass
+
 
 def get_target():
     try:
         with open('data_.pickle', 'rb') as f:
-            data_list = pickle.load(f)            
+            data_list = pickle.load(f)
     except Exception as e:
         print("Error!!!! : ", e)
         data_list = []
 
     return data_list
+
 
 @pytest.mark.parametrize('udid, deviceName, systemPort', settings)
 def testmy(udid, deviceName, systemPort):
@@ -92,24 +98,29 @@ def testmy(udid, deviceName, systemPort):
     #         'systemPort': int(systemPort)
     #     },
     # }
-    driver = AppiumDriver.Remote('http://localhost:4723/wd/hub', options=options)    
+    driver = AppiumDriver.Remote(
+        'http://localhost:4723/wd/hub', options=options)
+
+    driver.press
 
     time.sleep(5)
 
     test_list = []
     test_target_list = get_target()
 
-    #flag 1 -> tap
-    #flag 2 -> img
-    #...
+    # flag 1 -> tap
+    # flag 2 -> img
+    # ...
 
     for i in range(len(test_target_list)):
         if test_target_list[i]['flag'] == 1:
             print('flag : ', test_target_list[i]['flag'])
-            test_list.append(element_click_from_img(driver, test_target_list[i]['img']))
+            test_list.append(element_click_from_img(
+                driver, test_target_list[i]['img']))
         elif test_target_list[i]['flag'] == 2:
             print('flag : ', test_target_list[i]['flag'])
-            test_list.append(element_click_from_coordinate(driver, x=test_target_list[i]['x'], y=test_target_list[i]['y']))
+            test_list.append(element_click_from_coordinate(
+                driver, x=test_target_list[i]['x'], y=test_target_list[i]['y']))
 
     print('startting for test...', test_list)
     test_list
@@ -121,13 +132,13 @@ def testmy(udid, deviceName, systemPort):
     # wait_for_element(driver=driver, locator=(AppiumBy.XPATH, '//*[@text="홍정원"]'))
     # driver.find_element(by=AppiumBy.XPATH, value='//*[@text="홍정원"]').click()
     # driver.quit()
-  
 
     # driver.find_element(by=AppiumBy.XPATH,
     #                     value='//*[@text="Battery"]').click()
     # driver.quit()
 
     assert True
+
 
 def save_pick(insert_data):
     try:
@@ -142,16 +153,17 @@ def save_pick(insert_data):
     data = insert_data
     data_list.append(data)
     with open('data_.pickle', 'wb') as f:
-            pickle.dump(data_list, f)
+        pickle.dump(data_list, f)
+
 
 def test():
     test_list = []
     test_target_list = get_target()
-    #flag 1 -> tap
-    #flag 2 -> img
-    #...
+    # flag 1 -> tap
+    # flag 2 -> img
+    # ...
     print(test_target_list)
-    for i in range(len(test_target_list)):        
+    for i in range(len(test_target_list)):
         if test_target_list[i]['flag'] == 1:
             print(test_target_list[i]['img'])
         elif test_target_list[i]['flag'] == 2:
@@ -160,7 +172,7 @@ def test():
 
 
 if __name__ == "__main__":
-    save_pick({'flag': 1, 'x': '123', 'y': '456' })
-    save_pick({'flag': 2, 'path':'D:/a/b/c/adf.png'})
-    save_pick({'flag': 1, 'x':'789', 'y':'101112'})
+    save_pick({'flag': 1, 'x': '123', 'y': '456'})
+    save_pick({'flag': 2, 'path': 'D:/a/b/c/adf.png'})
+    save_pick({'flag': 1, 'x': '789', 'y': '101112'})
     test()
